@@ -1,44 +1,34 @@
-import NextLogo from "./next-logo";
-import SupabaseLogo from "./supabase-logo";
+import Spline from '@splinetool/react-spline';
 
 export default function Header() {
   return (
-    <div className="flex flex-col gap-16 items-center">
-      <div className="flex gap-8 justify-center items-center">
-        <a
-          href="https://supabase.com/?utm_source=create-next-app&utm_medium=template&utm_term=nextjs"
-          target="_blank"
-          rel="noreferrer"
+    <div
+      className="min-h-screen flex flex-col md:flex-row items-center justify-center p-8 bg-white"
+      style={{ height: '100vh' }}
+    >
+      {/* Left Content: Text and Call-to-Action */}
+      <div className="flex-1 flex flex-col justify-center items-start space-y-6 max-w-2xl p-8">
+        <h1 className="text-5xl md:text-6xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-500 to-purple-600">
+          See What They See, Feel What They Feel
+        </h1>
+        
+        <p className="text-lg text-gray-700">
+          Gain deep insights into viewer behavior. Identify the moments that captivate and the ones that lose them. Transform your videos into unforgettable experiences with real-time analytics and actionable feedback.
+        </p>
+        <button
+          className="px-8 py-3 bg-black text-white font-semibold rounded-lg hover:bg-gray-800 transition-all duration-300"
         >
-          <SupabaseLogo />
-        </a>
-        <span className="border-l rotate-45 h-6" />
-        <a href="https://nextjs.org/" target="_blank" rel="noreferrer">
-          <NextLogo />
-        </a>
+          Unlock Viewer Insights →
+        </button>
       </div>
-      <h1 className="sr-only">Supabase and Next.js Starter Template</h1>
-      <p className="text-3xl lg:text-4xl !leading-tight mx-auto max-w-xl text-center">
-        The fastest way to build apps with{" "}
-        <a
-          href="https://supabase.com/?utm_source=create-next-app&utm_medium=template&utm_term=nextjs"
-          target="_blank"
-          className="font-bold hover:underline"
-          rel="noreferrer"
-        >
-          Supabase
-        </a>{" "}
-        and{" "}
-        <a
-          href="https://nextjs.org/"
-          target="_blank"
-          className="font-bold hover:underline"
-          rel="noreferrer"
-        >
-          Next.js
-        </a>
-      </p>
-      <div className="w-full p-[1px] bg-gradient-to-r from-transparent via-foreground/10 to-transparent my-8" />
+
+      {/* Right Content: 3D Model */}
+      <div className="flex-1 w-full h-full flex items-center justify-center">
+        <Spline
+          scene="https://prod.spline.design/kDeJSI6dvtUrwiXy/scene.splinecode"
+          className="w-full h-full"
+        />
+      </div>
     </div>
   );
 }
