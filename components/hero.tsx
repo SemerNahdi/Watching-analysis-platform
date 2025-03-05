@@ -1,18 +1,19 @@
 import Spline from '@splinetool/react-spline';
+import { TypingAnimation } from './magicui/typing-animation';
 
 export default function Header() {
   return (
     <div
-      className="min-h-screen flex flex-col md:flex-row items-center justify-center p-8 bg-white"
+      className="min-h-screen flex flex-col md:flex-row items-center justify-center bg-transparent"
       style={{ height: '100vh' }}
     >
       {/* Left Content: Text and Call-to-Action */}
-      <div className="flex-1 flex flex-col justify-center items-start space-y-6 max-w-2xl p-8">
+      <div className="flex-1 flex flex-col justify-center items-start space-y-6 max-w-2xl ">
         <h1 className="text-5xl md:text-6xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-500 to-purple-600">
           See What They See, Feel What They Feel
         </h1>
         
-        <p className="text-lg text-gray-700">
+        <p className="text-lg text-gray-700 dark:text-white">
           Gain deep insights into viewer behavior. Identify the moments that captivate and the ones that lose them. Transform your videos into unforgettable experiences with real-time analytics and actionable feedback.
         </p>
         <button

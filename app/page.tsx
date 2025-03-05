@@ -3,7 +3,81 @@ import ConnectSupabaseSteps from "@/components/tutorial/connect-supabase-steps";
 import SignUpUserSteps from "@/components/tutorial/sign-up-user-steps";
 import { hasEnvVars } from "@/utils/supabase/check-env-vars";
 import Spline from "@splinetool/react-spline";
-
+import { PricingSection } from "@/components/pricing-section";
+export const PAYMENT_FREQUENCIES = ["monthly", "yearly"]
+import { Feature } from "@/components/ui/feature-with-advantages";
+export const TIERS = [
+  {
+    id: "hobbyist",
+    name: "Hobbyist",
+    price: {
+      monthly: "Free",
+      yearly: "Free",
+    },
+    description: "Perfect for casual creators",
+    features: [
+      "1 video analysis per month",
+      "Basic engagement metrics",
+      "3-minute processing time",
+      "Up to 3 saved reports",
+      "Email support",
+    ],
+    cta: "Get started",
+  },
+  {
+    id: "creator",
+    name: "Creator",
+    price: {
+      monthly: 29,
+      yearly: 25,
+    },
+    description: "Ideal for growing creators",
+    features: [
+      "10 video analyses per month",
+      "Advanced engagement insights",
+      "1-minute processing time",
+      "Unlimited saved reports",
+      "Priority email support",
+    ],
+    cta: "Get started",
+    popular: true, // Highlight this plan as popular
+  },
+  {
+    id: "pro",
+    name: "Pro",
+    price: {
+      monthly: 99,
+      yearly: 89,
+    },
+    description: "For professional content creators",
+    features: [
+      "Unlimited video analyses",
+      "Real-time engagement tracking",
+      "30-second processing time",
+      "Customizable reports",
+      "Dedicated account manager",
+    ],
+    cta: "Get started",
+  },
+  {
+    id: "enterprise",
+    name: "Enterprise",
+    price: {
+      monthly: "Custom",
+      yearly: "Custom",
+    },
+    description: "For teams and agencies",
+    features: [
+      "Everything in Pro",
+      "Team collaboration tools",
+      "White-label reports",
+      "API access",
+      "24/7 priority support",
+    ],
+    cta: "Contact Us",
+    highlighted: true, // Highlight this plan for enterprise customers
+  },
+];
 export default async function Home() {
   return (
     <>
@@ -12,74 +86,14 @@ export default async function Home() {
         <h2 className="font-medium text-xl mb-4">Next steps</h2>
         {hasEnvVars ? <SignUpUserSteps /> : <ConnectSupabaseSteps />}
       </main> */}
-      <div className="py-16 bg-gray-50">
-        <div className="container mx-auto px-4">
-          <h2 className="text-3xl font-bold text-center mb-12">
-            What We Offer
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="text-center">
-              <div className="text-4xl mb-4">📊</div>
-              <h3 className="text-xl font-semibold">Real-Time Analytics</h3>
-              <p className="text-gray-600">
-                Track viewer engagement in real-time and make data-driven
-                decisions.
-              </p>
-            </div>
-            <div className="text-center">
-              <div className="text-4xl mb-4">🎯</div>
-              <h3 className="text-xl font-semibold">Actionable Insights</h3>
-              <p className="text-gray-600">
-                Identify key moments and optimize your content for maximum
-                impact.
-              </p>
-            </div>
-            <div className="text-center">
-              <div className="text-4xl mb-4">🚀</div>
-              <h3 className="text-xl font-semibold">Boost Engagement</h3>
-              <p className="text-gray-600">
-                Turn passive viewers into active fans with captivating content.
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div className="py-16 bg-white">
-        <div className="container mx-auto px-4">
-          <h2 className="text-3xl font-bold text-center mb-12">How It Works</h2>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-            <div className="text-center">
-              <div className="text-4xl mb-4">1</div>
-              <h3 className="text-xl font-semibold">Upload Your Video</h3>
-              <p className="text-gray-600">
-                Easily upload your video to our platform.
-              </p>
-            </div>
-            <div className="text-center">
-              <div className="text-4xl mb-4">2</div>
-              <h3 className="text-xl font-semibold">Analyze Engagement</h3>
-              <p className="text-gray-600">
-                We analyze viewer behavior and highlight key moments.
-              </p>
-            </div>
-            <div className="text-center">
-              <div className="text-4xl mb-4">3</div>
-              <h3 className="text-xl font-semibold">Get Insights</h3>
-              <p className="text-gray-600">
-                Receive actionable insights to improve your content.
-              </p>
-            </div>
-            <div className="text-center">
-              <div className="text-4xl mb-4">4</div>
-              <h3 className="text-xl font-semibold">Optimize & Grow</h3>
-              <p className="text-gray-600">
-                Create better videos and grow your audience.
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
-
+      <Feature />
+      how it works section 
+      <PricingSection
+          title="Simple Pricing"
+          subtitle="Choose the best plan for your needs"
+          frequencies={PAYMENT_FREQUENCIES}
+          tiers={TIERS}
+        />
       <div className="py-16 bg-gray-50">
         <div className="container mx-auto px-4">
           <h2 className="text-3xl font-bold text-center mb-12">
