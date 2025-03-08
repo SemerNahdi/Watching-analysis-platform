@@ -82,6 +82,10 @@ const config = {
   		},
   		maskImage: {
   			'radial-gradient': 'radial-gradient(var(--tw-gradient-stops))'
+  		},
+  		backgroundImage: {
+  			'grid-pattern': '',
+  			'grid-pattern-light': '',
   		}
   	}
   },

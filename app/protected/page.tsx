@@ -5,6 +5,8 @@ import { createClient } from "@/utils/supabase/client";
 import { InfoIcon } from "lucide-react";
 import { redirect } from "next/navigation";
 import toast, { Toaster } from "react-hot-toast";
+import { AnimatedGroup } from "@/components/motion-primitives/animated-group";
+import { motion } from "framer-motion"; // Import motion for animation
 
 export default function ProtectedPage() {
   const supabase = createClient();
@@ -12,6 +14,7 @@ export default function ProtectedPage() {
   const [images, setImages] = useState([]);
   const [file, setFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
+  const [loadingImages, setLoadingImages] = useState(true); // New state to track loading
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -29,23 +32,22 @@ export default function ProtectedPage() {
     fetchUser();
   }, []);
 
-  // Define the fetchImages function outside of useEffect so it can be used by both
   const fetchImages = async () => {
     if (!user) return; // Ensure user is available before fetching images
 
+    setLoadingImages(true); // Set loading to true when fetching images
     const { data, error } = await supabase
       .from("images")
-      .select("*")
-      .eq("user_id", user.id); // Only fetch the images of the logged-in user
+      .select("*");
 
     if (error) {
       console.error("Error fetching images:", error.message);
     } else {
       setImages(data);
     }
+    setLoadingImages(false); // Set loading to false when done fetching images
   };
 
-  // Fetch images whenever the user changes
   useEffect(() => {
     fetchImages();
   }, [user]); // Dependency on user, so it fetches images when the user is set
@@ -93,6 +95,7 @@ export default function ProtectedPage() {
     setUploading(false);
     setFile(null);
   };
+
   const handleDelete = async (imageId: string, fileName: string) => {
     console.log("handleDelete called with:", imageId, fileName); // Debugging log
     if (!user) return;
@@ -144,31 +147,47 @@ export default function ProtectedPage() {
         </button>
       </div>
 
-      {/* Display Uploaded Images */}
-      <div>
-        <h2 className="font-bold text-2xl mb-4">Uploaded Images</h2>
-        {images.length > 0 ? (
-          <div className="grid grid-cols-3 gap-4">
-            {images.map((img) => (
-              <div key={img.id} className="relative">
-                <img
-                  src={img.file_url} // Use the public URL saved in the database
-                  alt={img.file_name}
-                  className="w-full h-40 object-cover rounded-md"
-                />
-                <button
-                  onClick={() => handleDelete(img.id, img.file_name)}
-                  className="absolute top-2 right-2 bg-red-500 text-white p-2 rounded-full"
-                >
-                  Delete
-                </button>
+      {/* Loading State */}
+      {loadingImages ? (
+        <div className="flex justify-center items-center h-40">
+          <motion.div
+            animate={{ rotate: 360 }}
+            transition={{ repeat: Infinity, duration: 1 }}
+            className="w-12 h-12 border-4 border-t-blue-500 border-gray-300 rounded-full"
+          />
+        </div>
+      ) : (
+        <AnimatedGroup preset="scale">
+          {/* Display Uploaded Images */}
+          <div>
+            <h2 className="font-bold text-2xl mb-4">Uploaded Images</h2>
+            {images.length > 0 ? (
+              <div className="grid grid-cols-3 gap-4">
+                {images.map((img) => (
+                  <div key={img.id} className="relative">
+                    <motion.img
+                      src={img.file_url} // Use the public URL saved in the database
+                      alt={img.file_name}
+                      className="w-full h-40 object-cover rounded-md"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ duration: 0.5 }}
+                    />
+                    <button
+                      onClick={() => handleDelete(img.id, img.file_name)}
+                      className="absolute top-2 right-2 bg-red-500 text-white p-2 rounded-full"
+                    >
+                      Delete
+                    </button>
+                  </div>
+                ))}
               </div>
-            ))}
+            ) : (
+              <p>No images uploaded yet.</p>
+            )}
           </div>
-        ) : (
-          <p>No images uploaded yet.</p>
-        )}
-      </div>
+        </AnimatedGroup>
+      )}
     </div>
   );
 }

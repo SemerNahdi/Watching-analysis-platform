@@ -1,5 +1,7 @@
 import Spline from '@splinetool/react-spline';
 import { TypingAnimation } from './magicui/typing-animation';
+import { RainbowButton } from "@/components/ui/rainbow-button"
+
 
 export default function Header() {
   return (
@@ -16,11 +18,8 @@ export default function Header() {
         <p className="text-lg text-gray-700 dark:text-white">
           Gain deep insights into viewer behavior. Identify the moments that captivate and the ones that lose them. Transform your videos into unforgettable experiences with real-time analytics and actionable feedback.
         </p>
-        <button
-          className="px-8 py-3 bg-black text-white font-semibold rounded-lg hover:bg-gray-800 transition-all duration-300"
-        >
-          Unlock Viewer Insights →
-        </button>
+      
+        <RainbowButton>Unlock Viewer Insights</RainbowButton>
       </div>
 
       {/* Right Content: 3D Model */}
