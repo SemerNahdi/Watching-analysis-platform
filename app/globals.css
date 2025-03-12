@@ -63,6 +63,25 @@
     --chart-5: 340 75% 55%;
   }
 }
+/* globals.css */
+html {
+  scroll-behavior: smooth;
+}
+/* globals.css */
+@keyframes fadeInBlur {
+  from {
+    opacity: 0;
+    filter: blur(10px);
+  }
+  to {
+    opacity: 1;
+    filter: blur(0);
+  }
+}
+
+.fade-in-blur {
+  animation: fadeInBlur 1s ease-in-out;
+}
 
 @layer base {
   * {
