@@ -2,28 +2,32 @@
 
 import { useEffect, useState } from "react";
 import { createClient } from "@/utils/supabase/client";
-import { InfoIcon } from "lucide-react";
 import { redirect } from "next/navigation";
 import toast, { Toaster } from "react-hot-toast";
-import { AnimatedGroup } from "@/components/motion-primitives/animated-group";
-import { motion } from "framer-motion"; // Import motion for animation
+import { InfoIcon } from "lucide-react";
+import FileUpload from "@/components/FileUpload"; // Import the FileUpload component
+import ImageGallery from "@/components/ImageGallery"; // Import the ImageGallery component
 
 export default function ProtectedPage() {
   const supabase = createClient();
   const [user, setUser] = useState(null);
-  const [images, setImages] = useState([]);
   const [file, setFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
-  const [loadingImages, setLoadingImages] = useState(true); // New state to track loading
+  const [images, setImages] = useState<any[]>([]); // Replace `any` with the correct image type
+  const [loadingImages, setLoadingImages] = useState(true);
 
   useEffect(() => {
     const fetchUser = async () => {
       const {
         data: { user },
       } = await supabase.auth.getUser();
-
       if (!user) {
-        redirect("/sign-in");
+        // redirect("/sign-in");
+        // Add your custom sign-in logic here
+        toast.error("You must be signed in to access this page.", {
+          icon: <InfoIcon />,
+        });
+        return;
       } else {
         setUser(user);
       }
@@ -33,24 +37,21 @@ export default function ProtectedPage() {
   }, []);
 
   const fetchImages = async () => {
-    if (!user) return; // Ensure user is available before fetching images
-
-    setLoadingImages(true); // Set loading to true when fetching images
-    const { data, error } = await supabase
-      .from("images")
-      .select("*");
+    if (!user) return;
+    setLoadingImages(true);
+    const { data, error } = await supabase.from("images").select("*");
 
     if (error) {
       console.error("Error fetching images:", error.message);
     } else {
       setImages(data);
     }
-    setLoadingImages(false); // Set loading to false when done fetching images
+    setLoadingImages(false);
   };
 
   useEffect(() => {
     fetchImages();
-  }, [user]); // Dependency on user, so it fetches images when the user is set
+  }, [user]);
 
   const handleUpload = async () => {
     if (!file || !user) return;
@@ -66,7 +67,6 @@ export default function ProtectedPage() {
       console.error("Error uploading file:", error.message);
       toast.error("Failed to upload image.");
     } else {
-      // Get the public URL of the uploaded file
       const { data: publicUrlData, error: urlError } = supabase.storage
         .from("watchplatform-videos")
         .getPublicUrl(`images/${fileName}`);
@@ -77,7 +77,6 @@ export default function ProtectedPage() {
       } else {
         const publicUrl = publicUrlData.publicUrl;
 
-        // Store image metadata in the database including the file URL
         const { error: dbError } = await supabase
           .from("images")
           .insert([{ file_name: fileName, file_url: publicUrl, user_id: user.id }]);
@@ -87,17 +86,15 @@ export default function ProtectedPage() {
           toast.error(`Failed to save metadata. ${dbError.message}`);
         } else {
           toast.success("Image uploaded successfully!");
-          fetchImages(); // Refresh the list of images
+          fetchImages(); // Refresh images after upload
         }
       }
     }
-
     setUploading(false);
     setFile(null);
   };
 
   const handleDelete = async (imageId: string, fileName: string) => {
-    console.log("handleDelete called with:", imageId, fileName); // Debugging log
     if (!user) return;
 
     // Deleting from Supabase Storage
@@ -128,8 +125,9 @@ export default function ProtectedPage() {
   };
 
   return (
-    <div className="flex-1 w-full flex flex-col gap-12">
+    <div className="flex flex-col gap-12">
       <Toaster />
+      
       {/* Authenticated User Info */}
       <div className="w-full">
         <div className="bg-accent text-sm p-3 px-5 rounded-md text-foreground flex gap-3 items-center">
@@ -140,53 +138,25 @@ export default function ProtectedPage() {
 
       {/* Upload Image Section */}
       <div className="flex flex-col gap-4">
-        <h2 className="font-bold text-2xl">Upload an Image</h2>
-        <input type="file" accept="image/*" onChange={(e) => setFile(e.target.files?.[0] || null)} />
-        <button onClick={handleUpload} disabled={uploading} className="px-4 py-2 bg-blue-500 text-white rounded-md">
-          {uploading ? "Uploading..." : "Upload"}
-        </button>
+        <FileUpload 
+          file={file} 
+          uploading={uploading} 
+          setFile={setFile} 
+          handleUpload={handleUpload} 
+        />
       </div>
 
-      {/* Loading State */}
+      {/* Image Gallery */}
       {loadingImages ? (
         <div className="flex justify-center items-center h-40">
-          <motion.div
-            animate={{ rotate: 360 }}
-            transition={{ repeat: Infinity, duration: 1 }}
-            className="w-12 h-12 border-4 border-t-blue-500 border-gray-300 rounded-full"
-          />
+          {/* Loading Spinner */}
         </div>
       ) : (
-        <AnimatedGroup preset="scale">
-          {/* Display Uploaded Images */}
-          <div>
-            <h2 className="font-bold text-2xl mb-4">Uploaded Images</h2>
-            {images.length > 0 ? (
-              <div className="grid grid-cols-3 gap-4">
-                {images.map((img) => (
-                  <div key={img.id} className="relative">
-                    <motion.img
-                      src={img.file_url} // Use the public URL saved in the database
-                      alt={img.file_name}
-                      className="w-full h-40 object-cover rounded-md"
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      transition={{ duration: 0.5 }}
-                    />
-                    <button
-                      onClick={() => handleDelete(img.id, img.file_name)}
-                      className="absolute top-2 right-2 bg-red-500 text-white p-2 rounded-full"
-                    >
-                      Delete
-                    </button>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <p>No images uploaded yet.</p>
-            )}
-          </div>
-        </AnimatedGroup>
+        <ImageGallery 
+          images={images} 
+          user={user} 
+          handleDelete={handleDelete} 
+        />
       )}
     </div>
   );
