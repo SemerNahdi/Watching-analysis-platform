@@ -109,15 +109,15 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({
 
       {/* Hero Video Dialog */}
       <HeroVideoDialog
-        videoSrc={selectedVideo || ""}
-        isOpen={!!selectedVideo}
-        onClose={() => setSelectedVideo(null)}
-        animationStyle="from-bottom"
-        onPlay={() => {
-          console.log("Video play event tracked");
-          toast.success("Video is now playing!");
-        }}
-      />
+  videoSrc={selectedVideo || ""}
+  isOpen={!!selectedVideo}
+  onClose={() => setSelectedVideo(null)}
+  animationStyle="from-bottom"
+  cameraEnabled={true} // Pass the toggle state
+  onPlay={() => {
+    console.log("Video play event tracked");
+  }}
+/>
     </div>
   );
 };

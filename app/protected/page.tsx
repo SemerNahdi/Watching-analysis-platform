@@ -177,12 +177,12 @@ export default function ProtectedPage() {
       <Toaster />
       
       {/* Authenticated User Info */}
-      <div className="w-full">
+      {/* <div className="w-full">
         <div className="bg-accent text-sm p-3 px-5 rounded-md text-foreground flex gap-3 items-center">
           <InfoIcon size="16" strokeWidth={2} />
           This is a protected page visible only to authenticated users.
         </div>
-      </div>
+      </div> */}
 
       {/* Upload Section */}
       <div className="flex flex-col gap-4">

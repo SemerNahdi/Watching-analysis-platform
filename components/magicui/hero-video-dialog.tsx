@@ -19,6 +19,7 @@ interface HeroVideoDialogProps {
   videoSrc: string;
   isOpen: boolean;
   onClose: () => void;
+  cameraEnabled: boolean;
   animationStyle?: AnimationStyle;
   onPlay?: () => void; // Callback for when the video starts playing
 }
@@ -71,11 +72,112 @@ export default function HeroVideoDialog({
   isOpen,
   onClose,
   animationStyle = "from-center",
+  cameraEnabled,
   onPlay,
 }: HeroVideoDialogProps) {
   const playerRef = useRef<YT.Player | null>(null); // Ref for the YouTube player
   const [isYouTube, setIsYouTube] = useState(false); // Track if the video is from YouTube
+  const [videoProgress, setVideoProgress] = useState(0); // Track video progress
+  const [mediaStream, setMediaStream] = useState<MediaStream | null>(null); // Track the media stream
   const videoId = videoSrc.split("/embed/")[1]?.split("?")[0]; // Extract YouTube video ID
+
+  // Function to close camera stream
+  const closeCamera = () => {
+    if (mediaStream) {
+      mediaStream.getTracks().forEach(track => track.stop()); // Stop all tracks of the media stream
+      setMediaStream(null); // Clear the media stream reference
+      console.log("Camera has been stopped.");
+    }
+  };
+
+  const checkCameraAccess = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+      setMediaStream(stream); // Store the stream
+      toast.success("Camera access granted. You can now watch the video.");
+      return true;
+    } catch (error) {
+      toast.error("Camera access denied or no camera available. Video playback is blocked.");
+      return false;
+    }
+  };
+
+  const saveUserLogs = async (videoId: string, currentTime: number, duration: number) => {
+    try {
+      const response = await fetch("/api/save-logs", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          videoId,
+          currentTime,
+          duration,
+          userId: "user-id", // Replace with actual user ID
+        }),
+      });
+
+      if (!response.ok) {
+        console.error("Failed to save logs");
+      }
+    } catch (error) {
+      console.error("Error saving logs:", error);
+    }
+  };
+
+  const onPlayerStateChange = async (event: YT.OnStateChangeEvent) => {
+    const player = playerRef.current;
+
+    if (event.data === YT.PlayerState.PLAYING) {
+      if (cameraEnabled) {
+        const hasCamera = await checkCameraAccess();
+        if (!hasCamera) {
+          player?.pauseVideo(); // Pause video if no camera
+          return;
+        }
+      }
+
+      console.log("Video started playing");
+      toast.success("Video started playing");
+
+      // Start tracking video progress
+      const interval = setInterval(() => {
+        if (player) {
+          const currentTime = player.getCurrentTime();
+          const duration = player.getDuration();
+          setVideoProgress((currentTime / duration) * 100); // Update progress
+
+          console.log(`Watched ${currentTime} out of ${duration} seconds`);
+
+          // Save logs to your backend
+          //saveUserLogs(videoId, currentTime, duration);
+        }
+      }, 5000); // Log every 5 seconds
+
+      // Cleanup interval when video stops
+      player?.addEventListener("onStateChange", (e) => {
+        if (e.data === YT.PlayerState.PAUSED || e.data === YT.PlayerState.ENDED) {
+          clearInterval(interval);
+        }
+      });
+
+      // Trigger the onPlay callback (if provided)
+      if (onPlay) onPlay();
+    }
+  };
+
+  const handleCloseModal = () => {
+    if (videoProgress < 90) {
+      const confirmation = window.confirm("Are you sure you want to close the modal? You haven't watched 90% of the video.");
+      if (confirmation) {
+        closeCamera(); // Stop the camera when closing
+        onClose();
+      }
+    } else {
+      closeCamera(); // Stop the camera when closing
+      onClose();
+    }
+  };
 
   useEffect(() => {
     if (!isOpen || !videoId) return;
@@ -94,7 +196,7 @@ export default function HeroVideoDialog({
         videoId: videoId,
         events: {
           onReady: onPlayerReady,
-          onStateChange: onPlayerStateChange,
+          onStateChange: onPlayerStateChange, // Ensure you are using the same function here
         },
       });
     };
@@ -103,20 +205,13 @@ export default function HeroVideoDialog({
     return () => {
       playerRef.current?.destroy();
       delete (window as any).onYouTubeIframeAPIReady;
+      closeCamera(); // Ensure the camera is closed when the modal is cleaned up
     };
   }, [isOpen, videoId]);
 
   const onPlayerReady = (event: YT.PlayerEvent) => {
     // Player is ready
     console.log("YouTube player is ready");
-  };
-
-  const onPlayerStateChange = (event: YT.OnStateChangeEvent) => {
-    if (event.data === YT.PlayerState.PLAYING) {
-      console.log("Video started playing");
-      //toast.success("Video started playing");
-      if (onPlay) onPlay(); // Trigger the onPlay callback
-    }
   };
 
   const selectedAnimation = animationVariants[animationStyle];
@@ -128,7 +223,6 @@ export default function HeroVideoDialog({
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          onClick={onClose}
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-md"
         >
           <motion.div
@@ -138,7 +232,7 @@ export default function HeroVideoDialog({
             onClick={(e) => e.stopPropagation()} // Prevent modal from closing when clicking inside
           >
             <motion.button
-              onClick={onClose}
+              onClick={handleCloseModal} // Use the new close handler
               className="absolute -top-16 right-0 rounded-full bg-neutral-900/50 p-2 text-xl text-white ring-1 backdrop-blur-md"
             >
               <XIcon className="size-5" />
