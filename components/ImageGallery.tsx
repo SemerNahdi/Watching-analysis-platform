@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { Play } from "lucide-react"; // Import the Play icon
 import HeroVideoDialog from "@/components/magicui/hero-video-dialog"; // Import the updated HeroVideoDialog
+import toast from "react-hot-toast";
 
 interface Media {
   id: string;
@@ -110,8 +111,12 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({
       <HeroVideoDialog
         videoSrc={selectedVideo || ""}
         isOpen={!!selectedVideo}
-        onClose={() => setSelectedVideo(null)} // Close the modal
-        animationStyle="from-center" // Customize the animation style
+        onClose={() => setSelectedVideo(null)}
+        animationStyle="from-bottom"
+        onPlay={() => {
+          console.log("Video play event tracked");
+          toast.success("Video is now playing!");
+        }}
       />
     </div>
   );

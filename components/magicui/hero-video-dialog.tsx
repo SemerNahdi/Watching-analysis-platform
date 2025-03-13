@@ -1,7 +1,9 @@
 "use client";
 
+import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { XIcon } from "lucide-react";
+import toast from "react-hot-toast";
 
 type AnimationStyle =
   | "from-bottom"
@@ -18,6 +20,7 @@ interface HeroVideoDialogProps {
   isOpen: boolean;
   onClose: () => void;
   animationStyle?: AnimationStyle;
+  onPlay?: () => void; // Callback for when the video starts playing
 }
 
 const animationVariants = {
@@ -68,7 +71,54 @@ export default function HeroVideoDialog({
   isOpen,
   onClose,
   animationStyle = "from-center",
+  onPlay,
 }: HeroVideoDialogProps) {
+  const playerRef = useRef<YT.Player | null>(null); // Ref for the YouTube player
+  const [isYouTube, setIsYouTube] = useState(false); // Track if the video is from YouTube
+  const videoId = videoSrc.split("/embed/")[1]?.split("?")[0]; // Extract YouTube video ID
+
+  useEffect(() => {
+    if (!isOpen || !videoId) return;
+
+    // Load YouTube IFrame API script
+    const tag = document.createElement("script");
+    tag.src = "https://www.youtube.com/iframe_api";
+    const firstScriptTag = document.getElementsByTagName("script")[0];
+    firstScriptTag.parentNode?.insertBefore(tag, firstScriptTag);
+
+    // Initialize YouTube player
+    (window as any).onYouTubeIframeAPIReady = () => {
+      playerRef.current = new YT.Player("youtube-player", {
+        height: "100%",
+        width: "100%",
+        videoId: videoId,
+        events: {
+          onReady: onPlayerReady,
+          onStateChange: onPlayerStateChange,
+        },
+      });
+    };
+
+    // Cleanup
+    return () => {
+      playerRef.current?.destroy();
+      delete (window as any).onYouTubeIframeAPIReady;
+    };
+  }, [isOpen, videoId]);
+
+  const onPlayerReady = (event: YT.PlayerEvent) => {
+    // Player is ready
+    console.log("YouTube player is ready");
+  };
+
+  const onPlayerStateChange = (event: YT.OnStateChangeEvent) => {
+    if (event.data === YT.PlayerState.PLAYING) {
+      console.log("Video started playing");
+      //toast.success("Video started playing");
+      if (onPlay) onPlay(); // Trigger the onPlay callback
+    }
+  };
+
   const selectedAnimation = animationVariants[animationStyle];
 
   return (
@@ -89,17 +139,13 @@ export default function HeroVideoDialog({
           >
             <motion.button
               onClick={onClose}
-              className="absolute -top-16 right-0 rounded-full bg-neutral-900/50 p-2 text-xl text-white ring-1 backdrop-blur-md dark:bg-neutral-100/50 dark:text-black"
+              className="absolute -top-16 right-0 rounded-full bg-neutral-900/50 p-2 text-xl text-white ring-1 backdrop-blur-md"
             >
               <XIcon className="size-5" />
             </motion.button>
-            <div className="relative isolate z-[1] w-full aspect-[16/9] overflow-hidden rounded-2xl border-2 border-white">
-              <iframe
-                src={videoSrc}
-                className="w-full h-full rounded-2xl"
-                allowFullScreen
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-              />
+            <div className="relative isolate z-[1] size-full overflow-hidden rounded-2xl border-2 border-white">
+              {/* YouTube Player */}
+              <div id="youtube-player" className="size-full rounded-2xl" />
             </div>
           </motion.div>
         </motion.div>
