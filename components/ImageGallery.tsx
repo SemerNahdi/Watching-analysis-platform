@@ -3,24 +3,9 @@ import { motion } from "framer-motion";
 import { Play } from "lucide-react"; // Import the Play icon
 import HeroVideoDialog from "@/components/magicui/hero-video-dialog"; // Import the updated HeroVideoDialog
 import toast from "react-hot-toast";
+import { Media  , ImageGalleryProps} from "@/types";
 
-interface Media {
-  id: string;
-  file_name: string;
-  file_url: string;
-  user_id: string;
-  type: "image" | "youtube";
-}
 
-interface ImageGalleryProps {
-  media: Media[];
-  user: any;
-  handleDelete: (
-    mediaId: string,
-    fileName: string,
-    type: "image" | "youtube"
-  ) => void;
-}
 
 const getYouTubeThumbnail = (videoId: string): string => {
   return `https://img.youtube.com/vi/${videoId}/0.jpg`; // Default thumbnail

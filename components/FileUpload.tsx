@@ -2,16 +2,7 @@ import React, { useState } from "react";
 import { Info, UploadCloud, Youtube, XIcon, Loader2 } from "lucide-react";
 import { motion } from "framer-motion";
 // import { Tooltip } from "@/components/ui/tooltip"; // Assuming you have a Tooltip component
-
-interface FileUploadProps {
-  file: File | null;
-  uploading: boolean;
-  setFile: React.Dispatch<React.SetStateAction<File | null>>;
-  youtubeLink: string;
-  setYoutubeLink: React.Dispatch<React.SetStateAction<string>>;
-  handleUpload: () => void;
-  uploadProgress?: number; // Add upload progress
-}
+import { FileUploadProps } from "@/types";
 
 const FileUpload: React.FC<FileUploadProps> = ({
   file,
