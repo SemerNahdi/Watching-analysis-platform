@@ -84,7 +84,7 @@ export default function HeroVideoDialog({
   // Function to close camera stream
   const closeCamera = () => {
     if (mediaStream) {
-      mediaStream.getTracks().forEach(track => track.stop()); // Stop all tracks of the media stream
+      mediaStream.getTracks().forEach((track) => track.stop()); // Stop all tracks of the media stream
       setMediaStream(null); // Clear the media stream reference
       console.log("Camera has been stopped.");
     }
@@ -97,12 +97,18 @@ export default function HeroVideoDialog({
       toast.success("Camera access granted. You can now watch the video.");
       return true;
     } catch (error) {
-      toast.error("Camera access denied or no camera available. Video playback is blocked.");
+      toast.error(
+        "Camera access denied or no camera available. Video playback is blocked."
+      );
       return false;
     }
   };
 
-  const saveUserLogs = async (videoId: string, currentTime: number, duration: number) => {
+  const saveUserLogs = async (
+    videoId: string,
+    currentTime: number,
+    duration: number
+  ) => {
     try {
       const response = await fetch("/api/save-logs", {
         method: "POST",
@@ -156,7 +162,10 @@ export default function HeroVideoDialog({
 
       // Cleanup interval when video stops
       player?.addEventListener("onStateChange", (e) => {
-        if (e.data === YT.PlayerState.PAUSED || e.data === YT.PlayerState.ENDED) {
+        if (
+          e.data === YT.PlayerState.PAUSED ||
+          e.data === YT.PlayerState.ENDED
+        ) {
           clearInterval(interval);
         }
       });
@@ -168,7 +177,9 @@ export default function HeroVideoDialog({
 
   const handleCloseModal = () => {
     if (videoProgress < 90) {
-      const confirmation = window.confirm("Are you sure you want to close the modal? You haven't watched 90% of the video.");
+      const confirmation = window.confirm(
+        "Are you sure you want to close the modal? You haven't watched 90% of the video."
+      );
       if (confirmation) {
         closeCamera(); // Stop the camera when closing
         onClose();

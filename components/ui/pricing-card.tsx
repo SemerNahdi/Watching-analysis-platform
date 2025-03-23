@@ -57,7 +57,7 @@ export function PricingCard({ tier, paymentFrequency }: PricingCardProps) {
             <NumberFlow
               format={{
                 style: "currency",
-                currency: "USD",
+                currency: "TND",
                 trailingZeroDisplay: "stripIfInteger",
               }}
               value={price}
