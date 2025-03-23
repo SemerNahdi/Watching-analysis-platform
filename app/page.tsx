@@ -9,6 +9,7 @@ import { Feature } from "@/components/ui/feature-with-advantages";
 // import { TestimonialsSection } from "@/components/testimonials-with-marquee";
 import { GoogleGeminiEffectDemo } from "@/components/GoogleGeminiEffectDemo";
 import Faq02 from "@/components/kokonutui/faq-02"
+import Chat from "@/components/Chat";
 
 export const TIERS = [
   {
@@ -109,6 +110,7 @@ export default async function Home() {
       <section id="faq">
         <Faq02 />
       </section>
+      <Chat />
     </>
   );
 }
