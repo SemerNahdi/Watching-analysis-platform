@@ -79,7 +79,7 @@ export default function HeroVideoDialog({
   const [showConfirmation, setShowConfirmation] = useState(false);
   const videoId = videoSrc.split("/embed/")[1]?.split("?")[0];
 
-  const { videoProgress, closeCamera } = useVideoPlayer({
+  const { videoProgress, closeCamera, pauseVideo } = useVideoPlayer({
     videoId: videoId || "",
     cameraEnabled,
     onPlay,
@@ -87,6 +87,7 @@ export default function HeroVideoDialog({
 
   const handleCloseModal = () => {
     if (videoProgress < 90) {
+      pauseVideo();
       setShowConfirmation(true);
     } else {
       closeCamera();
@@ -97,6 +98,10 @@ export default function HeroVideoDialog({
   const handleConfirmClose = () => {
     closeCamera();
     onClose();
+  };
+
+  const handleCancelClose = () => {
+    setShowConfirmation(false);
   };
 
   const selectedAnimation = animationVariants[animationStyle];
@@ -133,7 +138,7 @@ export default function HeroVideoDialog({
 
       <ConfirmationDialog
         isOpen={showConfirmation}
-        onClose={() => setShowConfirmation(false)}
+        onClose={handleCancelClose}
         onConfirm={handleConfirmClose}
         title="Close Video?"
         description={`You've only watched ${Math.round(videoProgress)}% of the video. Are you sure you want to close it?`}

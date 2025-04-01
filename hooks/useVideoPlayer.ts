@@ -20,6 +20,12 @@ export function useVideoPlayer({ videoId, cameraEnabled, onPlay }: UseVideoPlaye
         }
     };
 
+    const pauseVideo = () => {
+        if (playerRef.current) {
+            playerRef.current.pauseVideo();
+        }
+    };
+
     const checkCameraAccess = async () => {
         try {
             const stream = await navigator.mediaDevices.getUserMedia({ video: true });
@@ -35,25 +41,25 @@ export function useVideoPlayer({ videoId, cameraEnabled, onPlay }: UseVideoPlaye
     };
 
     const saveVideoProgress = async (currentTime: number, duration: number) => {
-        try {
-            const response = await fetch("/api/video-tracking", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                    videoId,
-                    currentTime,
-                    duration,
-                }),
-            });
+        // try {
+        //     const response = await fetch("/api/video-tracking", {
+        //         method: "POST",
+        //         headers: {
+        //             "Content-Type": "application/json",
+        //         },
+        //         body: JSON.stringify({
+        //             videoId,
+        //             currentTime,
+        //             duration,
+        //         }),
+        //     });
 
-            if (!response.ok) {
-                throw new Error("Failed to save video progress");
-            }
-        } catch (error) {
-            console.error("Error saving video progress:", error);
-        }
+        //     if (!response.ok) {
+        //         throw new Error("Failed to save video progress");
+        //     }
+        // } catch (error) {
+        //     console.error("Error saving video progress:", error);
+        // }
     };
 
     const onPlayerStateChange = async (event: YT.OnStateChangeEvent) => {
@@ -128,5 +134,6 @@ export function useVideoPlayer({ videoId, cameraEnabled, onPlay }: UseVideoPlaye
         videoProgress,
         isPlaying,
         closeCamera,
+        pauseVideo,
     };
 } 
