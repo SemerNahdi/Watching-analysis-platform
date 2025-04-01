@@ -1,14 +1,13 @@
 import React, { useState } from "react";
 import { motion } from "framer-motion";
-import { Play } from "lucide-react"; // Import the Play icon
-import HeroVideoDialog from "@/components/magicui/hero-video-dialog"; // Import the updated HeroVideoDialog
+import { Play, Trash2, Clock } from "lucide-react";
+import HeroVideoDialog from "@/components/magicui/hero-video-dialog";
 import toast from "react-hot-toast";
-import { Media  , ImageGalleryProps} from "@/types";
-
-
+import { Media, ImageGalleryProps } from "@/types";
+import { formatDistanceToNow } from "date-fns";
 
 const getYouTubeThumbnail = (videoId: string): string => {
-  return `https://img.youtube.com/vi/${videoId}/0.jpg`; // Default thumbnail
+  return `https://img.youtube.com/vi/${videoId}/0.jpg`;
 };
 
 const ImageGallery: React.FC<ImageGalleryProps> = ({
@@ -16,18 +15,18 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({
   user,
   handleDelete,
 }) => {
-  const [selectedVideo, setSelectedVideo] = useState<string | null>(null); // Track the selected video
+  const [selectedVideo, setSelectedVideo] = useState<string | null>(null);
 
   return (
     <div className="w-full">
       <h2 className="font-bold text-2xl mb-4">Uploaded Media</h2>
       {media.length > 0 ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {media.map((item) => (
-            <div key={item.id} className="relative">
+            <div key={item.id} className="group relative">
               {item.type === "image" ? (
                 <motion.div
-                  className="w-full aspect-[16/9] rounded-md overflow-hidden" // Use aspect ratio
+                  className="w-full aspect-[16/9] rounded-md overflow-hidden"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   transition={{ duration: 0.5 }}
@@ -35,7 +34,7 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({
                   <img
                     src={item.file_url}
                     alt={item.file_name}
-                    className="w-full h-full object-cover" // Ensure the image covers the area
+                    className="w-full h-full object-cover"
                   />
                 </motion.div>
               ) : (
@@ -50,9 +49,9 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({
                   {/* Thumbnail */}
                   <div className="w-full aspect-[16/9] rounded-md overflow-hidden border shadow-lg transition-all duration-200 ease-out group-hover:brightness-[0.8]">
                     <img
-                      src={getYouTubeThumbnail(item.file_url)} // Dynamically fetch thumbnail
+                      src={getYouTubeThumbnail(item.file_url)}
                       alt="Video thumbnail"
-                      className="w-full h-full object-cover" // Ensure the thumbnail covers the area
+                      className="w-full h-full object-cover"
                     />
                   </div>
 
@@ -75,16 +74,29 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({
                 </div>
               )}
 
-              {user.id === item.user_id && (
-                <button
-                  onClick={() =>
-                    handleDelete(item.id, item.file_name, item.type)
-                  }
-                  className="absolute top-2 right-2 bg-red-500 text-white p-2 rounded-full"
-                >
-                  🗑️
-                </button>
-              )}
+              {/* Metadata and Delete Button */}
+              <div className="mt-2 flex items-center justify-between">
+                <div className="flex items-center gap-2 text-sm text-neutral-600 dark:text-neutral-400">
+                  <Clock className="size-4" />
+                  <span>
+                    {formatDistanceToNow(new Date(item.created_at), {
+                      addSuffix: true,
+                    })}
+                  </span>
+                </div>
+                {user?.id === item.user_id && (
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleDelete(item.id, item.file_name, item.type);
+                    }}
+                    className="p-1.5 text-neutral-600 hover:text-red-500 dark:text-neutral-400 dark:hover:text-red-500 rounded-full hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors"
+                    title="Delete media"
+                  >
+                    <Trash2 className="size-4" />
+                  </button>
+                )}
+              </div>
             </div>
           ))}
         </div>
@@ -94,15 +106,15 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({
 
       {/* Hero Video Dialog */}
       <HeroVideoDialog
-  videoSrc={selectedVideo || ""}
-  isOpen={!!selectedVideo}
-  onClose={() => setSelectedVideo(null)}
-  animationStyle="from-bottom"
-  cameraEnabled={true} // Pass the toggle state
-  onPlay={() => {
-    console.log("Video play event tracked");
-  }}
-/>
+        videoSrc={selectedVideo || ""}
+        isOpen={!!selectedVideo}
+        onClose={() => setSelectedVideo(null)}
+        animationStyle="from-bottom"
+        cameraEnabled={true}
+        onPlay={() => {
+          console.log("Video play event tracked");
+        }}
+      />
     </div>
   );
 };
