@@ -26,4 +26,3 @@ export interface ImageGalleryProps {
     type: "image" | "youtube"
   ) => void;
 }
-
