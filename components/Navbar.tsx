@@ -131,9 +131,22 @@ function NavHeader() {
           {user ? (
             // Display the user's name and Sign Out button if logged in
             <div className="flex items-center gap-4">
-              <span className="text-sm font-medium text-gray-900 dark:text-white">
-                Welcome, {user}
-              </span>
+              <Link href="/profile">
+                <span className="text-sm font-medium text-gray-900 dark:text-white hover:underline cursor-pointer">
+                  Welcome, {user}
+                </span>
+              </Link>
+              <Link href="/profile">
+                <button
+                  className={`text-sm font-medium ${
+                    theme === "light"
+                      ? "text-black bg-white border-2 border-black hover:bg-gray-100"
+                      : "text-white bg-black border-2 border-white hover:bg-gray-700"
+                  } rounded-md py-2 px-4 transition-colors`}
+                >
+                  Profile
+                </button>
+              </Link>
               <button
                 onClick={handleSignOut}
                 className={`text-sm font-medium ${

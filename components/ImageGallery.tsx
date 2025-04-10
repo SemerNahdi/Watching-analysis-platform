@@ -5,7 +5,8 @@ import HeroVideoDialog from "@/components/magicui/hero-video-dialog";
 import toast from "react-hot-toast";
 import { Media, ImageGalleryProps } from "@/types";
 import { formatDistanceToNow } from "date-fns";
-
+import { FileText, Images, Link } from "lucide-react";
+import { EmptyState } from "@/components/ui/empty-state";
 const getYouTubeThumbnail = (videoId: string): string => {
   return `https://img.youtube.com/vi/${videoId}/0.jpg`;
 };
@@ -101,7 +102,17 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({
           ))}
         </div>
       ) : (
-        <p>No media uploaded yet.</p>
+        <EmptyState
+          title="No Media"
+          description="You haven't uploaded any media yet."
+          icons={[FileText , Link , Images]}
+          action={{
+            label: "Upload Media",
+            onClick: () => {
+              window.location.href = "/";
+            },
+          }}
+        />
       )}
 
       {/* Hero Video Dialog */}
