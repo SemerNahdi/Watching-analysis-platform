@@ -7,6 +7,7 @@ import { Media, ImageGalleryProps } from "@/types";
 import { formatDistanceToNow } from "date-fns";
 import { FileText, Images, Link } from "lucide-react";
 import { EmptyState } from "@/components/ui/empty-state";
+import { ConfirmationDialog } from "./ui/confirmation-dialog";
 const getYouTubeThumbnail = (videoId: string): string => {
   return `https://img.youtube.com/vi/${videoId}/0.jpg`;
 };
@@ -15,9 +16,10 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({
   media,
   user,
   handleDelete,
-}) => {
+}) => { 
   const [selectedVideo, setSelectedVideo] = useState<string | null>(null);
-
+  const [showConfirmation, setShowConfirmation] = useState(false);
+  const [itemToDelete, setItemToDelete] = useState<Media | null>(null);
   return (
     <div className="w-full">
       <h2 className="font-bold text-2xl mb-4">Uploaded Media</h2>
@@ -89,7 +91,8 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
-                      handleDelete(item.id, item.file_name, item.type);
+                      setItemToDelete(item);
+  setShowConfirmation(true);
                     }}
                     className="p-1.5 text-neutral-600 hover:text-red-500 dark:text-neutral-400 dark:hover:text-red-500 rounded-full hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors"
                     title="Delete media"
@@ -125,6 +128,23 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({
         onPlay={() => {
           console.log("Video play event tracked");
         }}
+      /><ConfirmationDialog
+        isOpen={showConfirmation}
+        onClose={() => {
+          setShowConfirmation(false);
+          setItemToDelete(null);
+        }}
+        onConfirm={() => {
+          if (itemToDelete) {
+            handleDelete(itemToDelete.id, itemToDelete.file_name, itemToDelete.type);
+            setShowConfirmation(false);
+            setItemToDelete(null);
+          }
+        }}
+        title="Delete Media?"
+        description={`Are you sure you want to delete this ${itemToDelete?.type === "image" ? "image" : "video"}?`}
+        confirmText="Delete"
+        cancelText="Cancel"
       />
     </div>
   );
