@@ -1,22 +1,45 @@
-import { useRef, useState, useEffect } from "react";
+import { useRef, useState, useEffect, useCallback } from "react";
 import toast from "react-hot-toast";
+import { faceDetectionService, EmotionData } from "@/services/faceDetectionService";
 
 interface UseVideoPlayerProps {
     videoId: string;
     cameraEnabled: boolean;
     onPlay?: () => void;
+    onEmotionDetected?: (data: EmotionData) => void;
 }
 
-export function useVideoPlayer({ videoId, cameraEnabled, onPlay }: UseVideoPlayerProps) {
+export function useVideoPlayer({ videoId, cameraEnabled, onPlay, onEmotionDetected }: UseVideoPlayerProps) {
     const playerRef = useRef<YT.Player | null>(null);
     const [videoProgress, setVideoProgress] = useState(0);
     const [mediaStream, setMediaStream] = useState<MediaStream | null>(null);
+    const videoRef = useRef<HTMLVideoElement | null>(null);
     const [isPlaying, setIsPlaying] = useState(false);
 
     const closeCamera = () => {
-        if (mediaStream) {
-            mediaStream.getTracks().forEach((track) => track.stop());
-            setMediaStream(null);
+        try {
+            // Stop emotion tracking first
+            faceDetectionService.stopEmotionTracking();
+
+            // Stop all media tracks
+            if (mediaStream) {
+                mediaStream.getTracks().forEach((track) => {
+                    track.stop();
+                    track.enabled = false;
+                });
+                setMediaStream(null);
+            }
+
+            // Clean up video element
+            if (videoRef.current) {
+                videoRef.current.srcObject = null;
+                videoRef.current = null;
+            }
+
+            toast.success('Camera closed successfully');
+        } catch (error) {
+            console.error('Error closing camera:', error);
+            toast.error('Error closing camera');
         }
     };
 
@@ -30,11 +53,34 @@ export function useVideoPlayer({ videoId, cameraEnabled, onPlay }: UseVideoPlaye
         try {
             const stream = await navigator.mediaDevices.getUserMedia({ video: true });
             setMediaStream(stream);
-            toast.success("Camera access granted. You can now watch the video.");
+            
+            // Create video element for face detection
+            if (!videoRef.current) {
+                const video = document.createElement('video');
+                video.srcObject = stream;
+                await video.play();
+                videoRef.current = video;
+
+                // Check for face presence
+                const hasFace = await faceDetectionService.detectFace(video);
+                if (!hasFace) {
+                    toast.error('No face detected. Please position yourself in front of the camera.');
+                    closeCamera();
+                    return false;
+                }
+
+                // Start emotion tracking if callback is provided
+                if (onEmotionDetected) {
+                    toast.success('Starting emotion tracking...');
+                    faceDetectionService.startEmotionTracking(video, onEmotionDetected);
+                }
+            }
+
+            toast.success('Camera access granted and face detected. You can now watch the video.');
             return true;
         } catch (error) {
             toast.error(
-                "Camera access denied or no camera available. Video playback is blocked."
+                'Camera access denied or no camera available. Video playback is blocked.'
             );
             return false;
         }
@@ -124,9 +170,13 @@ export function useVideoPlayer({ videoId, cameraEnabled, onPlay }: UseVideoPlaye
 
         // Cleanup
         return () => {
-            playerRef.current?.destroy();
-            delete (window as any).onYouTubeIframeAPIReady;
-            closeCamera();
+            try {
+                playerRef.current?.destroy();
+                delete (window as any).onYouTubeIframeAPIReady;
+                closeCamera();
+            } catch (error) {
+                console.error('Error in cleanup:', error);
+            }
         };
     }, [videoId]);
 

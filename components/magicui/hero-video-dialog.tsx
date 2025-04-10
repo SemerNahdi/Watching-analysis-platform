@@ -1,10 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { XIcon } from "lucide-react";
 import { useVideoPlayer } from "@/hooks/useVideoPlayer";
 import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
+import { EmotionData } from "@/services/faceDetectionService";
+import toast from "react-hot-toast";
 
 type AnimationStyle =
   | "from-bottom"
@@ -79,11 +81,37 @@ export default function HeroVideoDialog({
   const [showConfirmation, setShowConfirmation] = useState(false);
   const videoId = videoSrc.split("/embed/")[1]?.split("?")[0];
 
+  const handleEmotionDetected = useCallback((data: EmotionData) => {
+    // Get the dominant emotion
+    const dominantEmotion = Object.entries(data.emotions).reduce((a, b) => a[1] > b[1] ? a : b)[0];
+    const timestamp = Math.floor(data.timestamp);
+    const minutes = Math.floor(timestamp / 60);
+    const seconds = timestamp % 60;
+    const timeString = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+
+    // Toast the emotion data
+    toast.success(`${timeString} - Detected emotion: ${dominantEmotion}`, {
+      duration: 1500,
+      position: 'bottom-right'
+    });
+
+    // Here you could also save the emotion data to your backend
+    console.log('Emotion data:', { timestamp, emotions: data.emotions });
+  }, []);
+
   const { videoProgress, closeCamera, pauseVideo } = useVideoPlayer({
     videoId: videoId || "",
     cameraEnabled,
     onPlay,
+    onEmotionDetected: handleEmotionDetected,
   });
+
+  useEffect(() => {
+    // Cleanup when dialog is closed
+    if (!isOpen) {
+      closeCamera();
+    }
+  }, [isOpen, closeCamera]);
 
   const handleCloseModal = () => {
     if (videoProgress < 90) {
